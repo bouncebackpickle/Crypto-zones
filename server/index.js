@@ -8,6 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const PORT = Number(process.env.PORT) || 8787;
 const API_KEY = process.env.COINGECKO_API_KEY || '';
+const APP_USERNAME = process.env.APP_USERNAME || '';
 const APP_PASSWORD = process.env.APP_PASSWORD || '';
 const MOCK = process.env.MOCK === '1';
 const CG = 'https://api.coingecko.com/api/v3';
@@ -126,8 +127,12 @@ app.disable('x-powered-by');
 if (APP_PASSWORD) {
   app.use((req, res, next) => {
     const [, b64] = (req.headers.authorization || '').split(' ');
-    const pass = b64 ? Buffer.from(b64, 'base64').toString().split(':').slice(1).join(':') : '';
-    if (pass === APP_PASSWORD) return next();
+    const decoded = b64 ? Buffer.from(b64, 'base64').toString() : '';
+    const i = decoded.indexOf(':');
+    const user = i >= 0 ? decoded.slice(0, i) : '';
+    const pass = i >= 0 ? decoded.slice(i + 1) : '';
+    const userOk = !APP_USERNAME || user === APP_USERNAME;
+    if (userOk && pass === APP_PASSWORD) return next();
     res.set('WWW-Authenticate', 'Basic realm="Crypto Zones"').status(401).send('Password required');
   });
 }
