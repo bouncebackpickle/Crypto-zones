@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { activeZone, fmtLevel, fmtPrice, fmtRange, nextZone, type Asset, type Ladder, type Market } from '../lib';
-import { Change, CoinLogo, Sparkline, Star, ZonePill } from './bits';
+import { Bell, Change, CoinLogo, Sparkline, Star, ZonePill } from './bits';
 
 export type SortKey = 'asset' | 'price' | 'change24h' | 'zone' | 'next';
 export interface Sort { key: SortKey; dir: 1 | -1 }
@@ -15,10 +15,13 @@ interface Props {
   onSort: (k: SortKey) => void;
   starred: Set<string>;
   toggleStar: (t: string) => void;
+  holdings: Set<string>;
+  canEdit: boolean;
+  toggleHolding: (t: string) => void;
   onOpen: (t: string) => void;
 }
 
-export function AssetSection({ title, dot, rows, markets, ladder, sort, onSort, starred, toggleStar, onOpen }: Props) {
+export function AssetSection({ title, dot, rows, markets, ladder, sort, onSort, starred, toggleStar, holdings, canEdit, toggleHolding, onOpen }: Props) {
   const [open, setOpen] = useState(true);
   const z = (a: Asset) => (ladder === 'in' ? a.ladderIn : a.ladderOut);
   const aggLabel = (a: Asset) =>
@@ -86,6 +89,7 @@ export function AssetSection({ title, dot, rows, markets, ladder, sort, onSort, 
                       <td className="py-3 pl-3 pr-3">
                         <div className="flex items-center gap-2">
                           <Star on={starred.has(a.ticker)} onClick={(e) => { e.stopPropagation(); toggleStar(a.ticker); }} />
+                          {canEdit && <Bell on={holdings.has(a.ticker)} onClick={(e) => { e.stopPropagation(); toggleHolding(a.ticker); }} />}
                           <CoinLogo src={m?.image} ticker={a.ticker} />
                           <div className="leading-tight">
                             <div className="font-extrabold tracking-tight text-white">{a.ticker}</div>
@@ -139,7 +143,10 @@ export function AssetSection({ title, dot, rows, markets, ladder, sort, onSort, 
                       <div className="font-bold text-white num">{price == null ? <Loading /> : fmtPrice(price)}</div>
                       <div className="text-xs font-semibold num"><Change value={m?.change24h} /></div>
                     </div>
-                    <Star on={starred.has(a.ticker)} onClick={(e) => { e.stopPropagation(); toggleStar(a.ticker); }} />
+                    <div className="flex flex-col">
+                      <Star on={starred.has(a.ticker)} onClick={(e) => { e.stopPropagation(); toggleStar(a.ticker); }} />
+                      {canEdit && <Bell on={holdings.has(a.ticker)} onClick={(e) => { e.stopPropagation(); toggleHolding(a.ticker); }} />}
+                    </div>
                   </div>
                   <div className="mt-3 flex items-center justify-between gap-2">
                     {zone ? <ZonePill zone={zone} size="sm" /> : <span />}

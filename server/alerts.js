@@ -1,3 +1,4 @@
+import { getHoldings, isHolding } from './holdings.js';
 // Zone-change alerts. Checks prices on a timer and notifies when a coin moves
 // into a different buy (ladder in) or sell (ladder out) zone.
 //
@@ -7,7 +8,7 @@
 //   DISCORD_WEBHOOK_URL   → Discord channel message
 // Options:
 //   ALERT_LADDERS   "in", "out" or "in,out" (default both)
-//   ALERT_TICKERS   only alert for these, e.g. "BTC,ETH,SOL" (default all)
+//   Which coins alert = "My holdings" (bell icons on the site, see holdings.js)
 //   ALERT_INTERVAL_MS  how often to check (default 60000)
 
 const env = process.env;
@@ -17,7 +18,6 @@ const TG_TOKEN = env.TELEGRAM_BOT_TOKEN || '';
 const TG_CHAT = env.TELEGRAM_CHAT_ID || '';
 const DISCORD = env.DISCORD_WEBHOOK_URL || '';
 const LADDERS = (env.ALERT_LADDERS || 'in,out').toLowerCase().split(',').map((s) => s.trim());
-const TICKERS = env.ALERT_TICKERS ? new Set(env.ALERT_TICKERS.toUpperCase().split(',').map((s) => s.trim())) : null;
 const INTERVAL = Number(env.ALERT_INTERVAL_MS) || 60_000;
 const CONFIRM_CHECKS = 2; // a new zone must hold for 2 checks in a row (stops flip-flopping at a boundary)
 const SITE_URL = env.SITE_URL || (env.RAILWAY_PUBLIC_DOMAIN ? `https://${env.RAILWAY_PUBLIC_DOMAIN}` : '');
@@ -123,7 +123,7 @@ export function alertStatus() {
   return {
     channels: channels(),
     ladders: LADDERS,
-    tickers: TICKERS ? [...TICKERS] : 'all',
+    holdings: getHoldings(),
     checkEverySeconds: INTERVAL / 1000,
     lastCheck: lastCheck && new Date(lastCheck).toISOString(),
     lastError,
@@ -138,12 +138,11 @@ export async function sendTestAlert() {
 }
 
 export function startAlerts({ assets, getMarkets }) {
-  const watched = assets.filter((a) => !TICKERS || TICKERS.has(a.ticker));
   const tick = async () => {
     try {
       const { coins } = await getMarkets();
       const price = new Map(coins.filter((c) => c.price != null).map((c) => [c.ticker, c.price]));
-      for (const a of watched) {
+      for (const a of assets) { // track every coin so newly-added holdings don't fire stale alerts
         const p = price.get(a.ticker);
         if (p == null) continue;
         for (const ladder of LADDERS) {
@@ -158,6 +157,7 @@ export function startAlerts({ assets, getMarkets }) {
           if (count < CONFIRM_CHECKS) { pending.set(key, { zone, count }); continue; }
           pending.delete(key);
           confirmed.set(key, zone);
+          if (!isHolding(a.ticker)) continue; // only alert for coins you hold
           const msg = describe(a, ladder, known, zone, p);
           history.unshift({ at: new Date().toISOString(), ticker: a.ticker, ladder, from: known, to: zone, price: p, message: msg.body });
           history.length = Math.min(history.length, 50);

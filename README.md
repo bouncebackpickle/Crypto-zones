@@ -51,9 +51,14 @@ The server checks prices every 60 seconds, around the clock. When a coin moves i
 - Discord: `DISCORD_WEBHOOK_URL` (Channel settings → Integrations → Webhooks → Copy URL)
 - Telegram: `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`
 
-**Filters** (optional):
-- `ALERT_LADDERS`: `in` (buy only), `out` (sell only) or `in,out` (default)
-- `ALERT_TICKERS`: only these coins, e.g. `BTC,ETH,SOL,HYPE` (default all 51)
+**Which coins alert: "My coins"**
+Only coins you hold send alerts. To change the list:
+- On the site, tap the 🔔 on any coin (or **Alerts on/off** in its detail panel). **🔔 My coins** filters the table to them.
+- Or open a URL "command": `your-site/api/holdings/add?coins=AVAX,LINK` or `your-site/api/holdings/remove?coins=XRP`
+- Only the owner can change the list: the first user in `APP_USERS`, or set `ADMIN_USER`. Other logins don't see the bells.
+- **Keep changes across redeploys:** in Railway, right-click the service → **Attach Volume** → mount path `/data`. Without a volume, the list resets to `alertHoldings` in `zones.json` on every deploy.
+
+**Other option:** `ALERT_LADDERS`: `in` (buy only), `out` (sell only) or `in,out` (default)
 
 `your-site/api/alerts` shows the alert settings and the last 20 alerts. After a redeploy the server starts fresh: it learns the current zones on its first check and alerts on changes from then on.
 

@@ -3,7 +3,7 @@ import {
   activeZone, fmtBig, fmtLevel, fmtPct, fmtPrice, fmtRange, fmtSupply, load, plainSummary, save,
   type Asset, type Ladder, type Market, type ZoneKey,
 } from '../lib';
-import { Change, CoinLogo, Star, ZonePill, ZONE_TEXT } from './bits';
+import { Bell, Change, CoinLogo, Star, ZonePill, ZONE_TEXT } from './bits';
 import { PriceChart } from './PriceChart';
 
 interface Detail {
@@ -17,9 +17,10 @@ interface Detail {
 const DAY = 24 * 3600_000;
 
 export function DetailDrawer({
-  asset, market, ladder, onClose, starred, toggleStar,
+  asset, market, ladder, onClose, starred, toggleStar, alertsOn, canEdit, toggleAlerts,
 }: {
   asset: Asset; market?: Market; ladder: Ladder; onClose: () => void; starred: boolean; toggleStar: () => void;
+  alertsOn: boolean; canEdit: boolean; toggleAlerts: () => void;
 }) {
   const [detail, setDetail] = useState<Detail | null>(null);
   const [err, setErr] = useState(false);
@@ -63,6 +64,7 @@ export function DetailDrawer({
               {(detail?.rank ?? market?.rank) && <span>Rank #{detail?.rank ?? market?.rank}</span>}
             </div>
           </div>
+          {canEdit && <Bell on={alertsOn} onClick={toggleAlerts} label />}
           <Star on={starred} onClick={toggleStar} />
           <button onClick={onClose} aria-label="Close" className="grid h-9 w-9 place-items-center rounded-lg text-ink-300 hover:bg-white/5 hover:text-white">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" /></svg>

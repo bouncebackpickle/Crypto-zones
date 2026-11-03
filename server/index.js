@@ -4,6 +4,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { startAlerts, sendTestAlert, alertStatus } from './alerts.js';
+import { initHoldings, getHoldings, setHolding, PERSISTENT } from './holdings.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -20,12 +21,16 @@ const USERS = new Map(
     .map((e) => [e.slice(0, e.indexOf(':')).trim(), e.slice(e.indexOf(':') + 1)])
 );
 const AUTH_ON = USERS.size > 0 || !!APP_PASSWORD;
+// Who may change alert holdings: ADMIN_USER, else the single-login username, else the first APP_USERS entry
+const ADMIN_USER = process.env.ADMIN_USER || APP_USERNAME || [...USERS.keys()][0] || '';
 const MOCK = process.env.MOCK === '1';
 const MOCK_SWING = Number(process.env.MOCK_SWING) || 0.01; // how far mock prices move (testing alerts)
 const CG = 'https://api.coingecko.com/api/v3';
 
 const zones = JSON.parse(readFileSync(path.join(ROOT, 'zones.json'), 'utf8'));
 const assets = zones.assets;
+const TICKER_SET = new Set(assets.map((a) => a.ticker));
+initHoldings(zones);
 
 // ---------- upstream queue (keeps us under CoinGecko's free rate limit) ----------
 const SPACING_MS = API_KEY ? 2100 : 4000;
@@ -142,8 +147,10 @@ if (AUTH_ON) {
     const i = decoded.indexOf(':');
     const user = i >= 0 ? decoded.slice(0, i) : '';
     const pass = i >= 0 ? decoded.slice(i + 1) : '';
-    if (USERS.has(user) && USERS.get(user) === pass) return next();
-    if (APP_PASSWORD && (!APP_USERNAME || user === APP_USERNAME) && pass === APP_PASSWORD) return next();
+    const ok =
+      (USERS.has(user) && USERS.get(user) === pass) ||
+      (APP_PASSWORD && (!APP_USERNAME || user === APP_USERNAME) && pass === APP_PASSWORD);
+    if (ok) { req.user = user; return next(); }
     res.set('WWW-Authenticate', 'Basic realm="Crypto Zones"').status(401).send('Password required');
   });
 }
@@ -154,6 +161,32 @@ app.get('/api/health', (_req, res) => res.json({ ok: true, mock: MOCK }));
 app.get('/api/alerts', (_req, res) => res.json(alertStatus()));
 app.get('/api/alerts/test', async (_req, res) => {
   try { res.json(await sendTestAlert()); } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ---------- My holdings (which coins send alerts) ----------
+const canEdit = (req) => !AUTH_ON || !ADMIN_USER || req.user === ADMIN_USER;
+const holdingsPayload = (req) => ({ tickers: getHoldings(), canEdit: canEdit(req), persistent: PERSISTENT });
+
+app.get('/api/holdings', (req, res) => res.json(holdingsPayload(req)));
+app.post('/api/holdings', express.json(), (req, res) => {
+  if (!canEdit(req)) return res.status(403).json({ error: 'Only the site owner can change alert coins' });
+  const { ticker, on } = req.body || {};
+  if (!setHolding(ticker, !!on, TICKER_SET)) return res.status(400).json({ error: `Unknown ticker ${ticker}` });
+  res.json(holdingsPayload(req));
+});
+// URL "commands": /api/holdings/add?coins=AVAX,LINK  and  /api/holdings/remove?coins=XRP
+app.get('/api/holdings/:action(add|remove)', (req, res) => {
+  if (!canEdit(req)) return res.status(403).type('text').send('Only the site owner can change alert coins.');
+  const coins = String(req.query.coins || req.query.coin || '').split(',').map((c) => c.trim().toUpperCase()).filter(Boolean);
+  if (!coins.length) return res.status(400).type('text').send('Add ?coins=TICKER (comma-separate several), e.g. /api/holdings/add?coins=AVAX,LINK');
+  const done = [], unknown = [];
+  for (const c of coins) (setHolding(c, req.params.action === 'add', TICKER_SET) ? done : unknown).push(c);
+  res.type('text').send(
+    `${req.params.action === 'add' ? 'Added' : 'Removed'}: ${done.join(', ') || 'none'}` +
+      (unknown.length ? `\nNot on the zone list: ${unknown.join(', ')}` : '') +
+      `\n\nAlerts now on for (${getHoldings().length}): ${getHoldings().join(', ') || 'none'}` +
+      (PERSISTENT ? '' : '\n\nHeads-up: no Railway volume attached, so this resets on the next deploy.')
+  );
 });
 
 app.get('/api/ids', async (_req, res) => {

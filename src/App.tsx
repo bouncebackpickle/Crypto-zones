@@ -21,6 +21,27 @@ export default function App() {
   const [starred, setStarred] = useState<Set<string>>(() => new Set(load<string[]>('cz:starred', [])));
   const [sort, setSort] = useState<Sort>({ key: 'zone', dir: -1 });
   const [open, setOpen] = useState<string | null>(null);
+  const [holdings, setHoldings] = useState<Set<string>>(new Set());
+  const [canEdit, setCanEdit] = useState(false);
+  const [persistent, setPersistent] = useState(true);
+  const [mineOnly, setMineOnly] = useState(false);
+
+  type HoldingsResp = { tickers: string[]; canEdit: boolean; persistent: boolean };
+  const applyHoldings = (d: HoldingsResp) => { setHoldings(new Set(d.tickers)); setCanEdit(d.canEdit); setPersistent(d.persistent); };
+  useEffect(() => {
+    fetch('/api/holdings').then((r) => (r.ok ? r.json() : null)).then((d) => d && applyHoldings(d)).catch(() => {});
+  }, []);
+  const toggleHolding = async (t: string) => {
+    const on = !holdings.has(t);
+    setHoldings((h) => { const n = new Set(h); on ? n.add(t) : n.delete(t); return n; }); // optimistic
+    try {
+      const r = await fetch('/api/holdings', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ticker: t, on }) });
+      if (r.ok) applyHoldings(await r.json());
+      else throw new Error();
+    } catch {
+      setHoldings((h) => { const n = new Set(h); on ? n.delete(t) : n.add(t); return n; }); // undo
+    }
+  };
 
   useEffect(() => save('cz:ladder', ladder), [ladder]);
   useEffect(() => save('cz:starred', [...starred]), [starred]);
@@ -73,6 +94,7 @@ export default function App() {
     const rows = ASSETS.filter((a) => {
       if (tier !== 'all' && a.tier !== tier) return false;
       if (starredOnly && !starred.has(a.ticker)) return false;
+      if (mineOnly && !holdings.has(a.ticker)) return false;
       if (zoneFilter) {
         const z = zoneOf(a);
         if (zoneFilter === 'above' ? z !== 'above' && z !== 'below' : z !== zoneFilter) return false;
@@ -105,7 +127,7 @@ export default function App() {
       const c = typeof x === 'string' ? x.localeCompare(y as string) : (x as number) - (y as number);
       return c * (sort.key === 'next' ? -sort.dir : sort.dir) || a.ticker.localeCompare(b.ticker);
     });
-  }, [query, tier, starredOnly, starred, zoneFilter, zoneOf, markets, sort, ladder]);
+  }, [query, tier, starredOnly, starred, mineOnly, holdings, zoneFilter, zoneOf, markets, sort, ladder]);
 
   const core = filtered.filter((a) => a.tier === 'core');
   const spec = filtered.filter((a) => a.tier === 'speculative');
@@ -197,24 +219,36 @@ export default function App() {
           >
             ★ Watchlist{starred.size ? ` (${starred.size})` : ''}
           </button>
-          {(zoneFilter || query || tier !== 'all' || starredOnly) && (
-            <button onClick={() => { setZoneFilter(null); setQuery(''); setTier('all'); setStarredOnly(false); }} className="px-2 text-xs font-semibold text-ink-400 hover:text-white">
+          {canEdit && (
+            <button
+              onClick={() => setMineOnly(!mineOnly)}
+              title="Coins you hold — these send zone-change alerts"
+              className={`rounded-xl border px-3 py-2 text-sm font-semibold transition ${mineOnly ? 'border-slow/50 bg-slow/10 text-slow' : 'border-white/[0.08] text-ink-300 hover:text-white'}`}
+            >
+              🔔 My coins ({holdings.size})
+            </button>
+          )}
+          {(zoneFilter || query || tier !== 'all' || starredOnly || mineOnly) && (
+            <button onClick={() => { setZoneFilter(null); setQuery(''); setTier('all'); setStarredOnly(false); setMineOnly(false); }} className="px-2 text-xs font-semibold text-ink-400 hover:text-white">
               Clear filters
             </button>
           )}
         </div>
 
         {tier !== 'speculative' && (
-          <AssetSection title="Core Assets" dot="bg-indigo-400 text-indigo-400" rows={core} markets={markets} ladder={ladder} sort={sort} onSort={onSort} starred={starred} toggleStar={toggleStar} onOpen={setOpen} />
+          <AssetSection title="Core Assets" dot="bg-indigo-400 text-indigo-400" rows={core} markets={markets} ladder={ladder} sort={sort} onSort={onSort} starred={starred} toggleStar={toggleStar} holdings={holdings} canEdit={canEdit} toggleHolding={toggleHolding} onOpen={setOpen} />
         )}
         {tier !== 'core' && (
-          <AssetSection title="Speculative Plays" dot="bg-fuchsia-400 text-fuchsia-400" rows={spec} markets={markets} ladder={ladder} sort={sort} onSort={onSort} starred={starred} toggleStar={toggleStar} onOpen={setOpen} />
+          <AssetSection title="Speculative Plays" dot="bg-fuchsia-400 text-fuchsia-400" rows={spec} markets={markets} ladder={ladder} sort={sort} onSort={onSort} starred={starred} toggleStar={toggleStar} holdings={holdings} canEdit={canEdit} toggleHolding={toggleHolding} onOpen={setOpen} />
         )}
 
         <footer className="pt-6 text-center text-[11px] leading-relaxed text-ink-400">
           Prices from CoinGecko, refreshed every 60s. Zones come from my research notes — not financial advice.
           <br />
-          Update zones by editing <code className="text-ink-300">zones.json</code> and pushing to GitHub.
+          Update zones by editing <code className="text-ink-300">zones.json</code> and pushing to GitHub. Tap 🔔 on a coin to turn its zone alerts on or off.
+          {canEdit && !persistent && (
+            <span className="mt-2 block text-mod">Alert coin changes reset on redeploy — attach a Railway volume at /data to keep them.</span>
+          )}
         </footer>
       </main>
 
@@ -226,6 +260,9 @@ export default function App() {
           onClose={() => setOpen(null)}
           starred={starred.has(openAsset.ticker)}
           toggleStar={() => toggleStar(openAsset.ticker)}
+          alertsOn={holdings.has(openAsset.ticker)}
+          canEdit={canEdit}
+          toggleAlerts={() => toggleHolding(openAsset.ticker)}
         />
       )}
     </div>

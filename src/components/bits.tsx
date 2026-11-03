@@ -91,3 +91,24 @@ export function Star({ on, onClick }: { on: boolean; onClick: (e: React.MouseEve
     </button>
   );
 }
+
+export function Bell({ on, onClick, label = false }: { on: boolean; onClick: (e: React.MouseEvent) => void; label?: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      title={on ? 'Alerts on — tap to turn off' : 'Alerts off — tap to turn on'}
+      aria-label={on ? 'Turn alerts off' : 'Turn alerts on'}
+      className={`flex h-7 shrink-0 items-center justify-center gap-1.5 rounded-md transition ${label ? 'border px-2.5 text-xs font-semibold' : 'w-7'} ${
+        on
+          ? `text-slow ${label ? 'border-slow/40 bg-slow/10' : ''}`
+          : `text-ink-600 hover:text-ink-300 ${label ? 'border-white/10' : ''}`
+      } hover:bg-white/5`}
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill={on ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
+        <path d="M6 8a6 6 0 1112 0c0 7 3 9 3 9H3s3-2 3-9" />
+        <path d="M10.3 21a1.94 1.94 0 003.4 0" strokeLinecap="round" />
+      </svg>
+      {label && (on ? 'Alerts on' : 'Alerts off')}
+    </button>
+  );
+}

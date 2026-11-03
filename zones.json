@@ -1,6 +1,19 @@
 {
   "source": "Transcribed from my DCA research screenshots",
   "zonesAsOf": "2026-11-03",
+  "alertHoldings": [
+    "XRP",
+    "BTC",
+    "ENA",
+    "SOL",
+    "ETH",
+    "ETHFI",
+    "VIRTUAL",
+    "ATH",
+    "HNT",
+    "LDO",
+    "CFG"
+  ],
   "notes": [
     "ladderIn: price above slow[1] = 'Above Zones'; inside slow = Slow; inside moderate = Moderate; below aggressiveBelow = Aggressive.",
     "ladderOut: price below slow[0] = 'Below Zones'; inside slow = Slow; inside moderate = Moderate; above aggressiveAbove = Aggressive.",
