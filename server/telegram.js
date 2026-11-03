@@ -9,12 +9,14 @@ import { DATA_DIR, getHoldings, setHolding } from './holdings.js';
 const env = process.env;
 // tolerate stray spaces/quotes from copy-paste
 const clean = (v) => String(v || '').trim().replace(/^['"]|['"]$/g, '').trim();
-const TOKEN = clean(env.TELEGRAM_BOT_TOKEN);
+const TOKEN = clean(env.TELEGRAM_BOT_TOKEN).replace(/\s+/g, '').replace(/^bot/i, '');
+const TOKEN_OK = /^\d{6,}:[A-Za-z0-9_-]{30,}$/.test(TOKEN);
+const TOKEN_HINT = TOKEN ? `${TOKEN.slice(0, 4)}…${TOKEN.slice(-3)} (${TOKEN.length} characters${TOKEN_OK ? '' : ', expected format 1234567890:AAF…'})` : null;
 const API = (env.TELEGRAM_API || 'https://api.telegram.org').replace(/\/$/, '');
 const FILE = path.join(DATA_DIR, 'telegram.json');
 
 let chatId = clean(env.TELEGRAM_CHAT_ID);
-const status = { configured: !!TOKEN, bot: null, polling: false, lastError: null, lastMessageAt: null };
+const status = { configured: !!TOKEN, token: TOKEN_HINT, bot: null, polling: false, lastError: null, lastMessageAt: null };
 export const telegramStatus = () => ({ ...status, connected: !!chatId });
 if (!chatId && existsSync(FILE)) {
   try { chatId = String(JSON.parse(readFileSync(FILE, 'utf8')).chatId || ''); } catch {}
