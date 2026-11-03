@@ -38,6 +38,25 @@ npm run dev:mock   # fake data, no internet needed
    - `APP_USERS`: logins for everyone who can see the site, written as `name:password` pairs separated by commas, e.g. `dillon:MyPass123,alex:HisPass456`. To remove someone, delete their pair and save.
    - (`APP_USERNAME` + `APP_PASSWORD` still work for a single login.)
 
+## Zone-change alerts
+The server checks prices every 60 seconds, around the clock. When a coin moves into a different buy or sell zone and stays there for 2 checks in a row, you get a notification, e.g. "🔴 BTC → Aggressive buy zone".
+
+**Phone push (ntfy, free, no account):**
+1. Install the **ntfy** app (iPhone or Android).
+2. Tap **+** and subscribe to a topic name only you know, e.g. `dillon-zones-8k3q7x`. Anyone who knows the name can read the alerts, so make it hard to guess.
+3. In Railway → Variables, add `NTFY_TOPIC` set to that same name.
+4. Visit `your-site/api/alerts/test`; you should get a test notification.
+
+**Other channels** (optional, can be combined):
+- Discord: `DISCORD_WEBHOOK_URL` (Channel settings → Integrations → Webhooks → Copy URL)
+- Telegram: `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`
+
+**Filters** (optional):
+- `ALERT_LADDERS`: `in` (buy only), `out` (sell only) or `in,out` (default)
+- `ALERT_TICKERS`: only these coins, e.g. `BTC,ETH,SOL,HYPE` (default all 51)
+
+`your-site/api/alerts` shows the alert settings and the last 20 alerts. After a redeploy the server starts fresh: it learns the current zones on its first check and alerts on changes from then on.
+
 ## How it works
 - `server/index.js`: a small Express server. It serves the site and proxies CoinGecko. Prices are cached for 60s and coin details for 24h, so every visitor shares one set of API calls and the key never reaches the browser.
 - `src/`: the React + Tailwind frontend. Charts use TradingView Lightweight Charts.

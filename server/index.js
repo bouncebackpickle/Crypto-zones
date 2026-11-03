@@ -3,6 +3,7 @@ import express from 'express';
 import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { startAlerts, sendTestAlert, alertStatus } from './alerts.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -20,6 +21,7 @@ const USERS = new Map(
 );
 const AUTH_ON = USERS.size > 0 || !!APP_PASSWORD;
 const MOCK = process.env.MOCK === '1';
+const MOCK_SWING = Number(process.env.MOCK_SWING) || 0.01; // how far mock prices move (testing alerts)
 const CG = 'https://api.coingecko.com/api/v3';
 
 const zones = JSON.parse(readFileSync(path.join(ROOT, 'zones.json'), 'utf8'));
@@ -106,9 +108,9 @@ function ensureIds() {
 
 // ---------- mock data (MOCK=1, for offline development) ----------
 function mockMarkets() {
-  const t = Date.now() / 60000;
+  const t = Date.now() / (Number(process.env.MOCK_PERIOD_MS) || 60000);
   return assets.map((a, i) => {
-    const wobble = 1 + 0.01 * Math.sin(t + i);
+    const wobble = 1 + MOCK_SWING * Math.sin(t + i);
     const price = a.snapshotPrice * wobble;
     return {
       ticker: a.ticker, id: a.ticker.toLowerCase(), name: a.ticker, image: null,
@@ -148,37 +150,46 @@ if (AUTH_ON) {
 
 app.get('/api/health', (_req, res) => res.json({ ok: true, mock: MOCK }));
 
+// Zone-change alerts: status + a test button
+app.get('/api/alerts', (_req, res) => res.json(alertStatus()));
+app.get('/api/alerts/test', async (_req, res) => {
+  try { res.json(await sendTestAlert()); } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('/api/ids', async (_req, res) => {
   if (MOCK) return res.json({ mock: true });
   try { await ensureIds(); } catch {}
   res.json(Object.fromEntries(assets.map((a) => [a.ticker, idMap.get(a.ticker) || null])));
 });
 
-app.get('/api/markets', async (_req, res) => {
-  if (MOCK) return res.json({ updatedAt: Date.now(), coins: mockMarkets() });
-  try {
-    const data = await cached('markets', 55_000, async () => {
-      await ensureIds();
-      const ids = [...new Set([...idMap.values()].map((v) => v.id).filter(Boolean))];
-      const rows = await cg(
-        `/coins/markets?vs_currency=usd&ids=${ids.join(',')}&per_page=250&sparkline=true&price_change_percentage=24h,7d`
-      );
-      const byId = new Map(rows.map((r) => [r.id, r]));
-      const coins = assets.map((a) => {
-        const id = idMap.get(a.ticker)?.id;
-        const r = id && byId.get(id);
-        if (!r) return { ticker: a.ticker, id: id || null, price: null };
-        return {
-          ticker: a.ticker, id: r.id, name: r.name, image: r.image, price: r.current_price,
-          change24h: r.price_change_percentage_24h_in_currency ?? r.price_change_percentage_24h,
-          change7d: r.price_change_percentage_7d_in_currency ?? null,
-          marketCap: r.market_cap, volume24h: r.total_volume, rank: r.market_cap_rank,
-          sparkline: r.sparkline_in_7d?.price || [],
-        };
-      });
-      return { updatedAt: Date.now(), coins };
+function getMarkets() {
+  if (MOCK) return Promise.resolve({ updatedAt: Date.now(), coins: mockMarkets() });
+  return cached('markets', 55_000, async () => {
+    await ensureIds();
+    const ids = [...new Set([...idMap.values()].map((v) => v.id).filter(Boolean))];
+    const rows = await cg(
+      `/coins/markets?vs_currency=usd&ids=${ids.join(',')}&per_page=250&sparkline=true&price_change_percentage=24h,7d`
+    );
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    const coins = assets.map((a) => {
+      const id = idMap.get(a.ticker)?.id;
+      const r = id && byId.get(id);
+      if (!r) return { ticker: a.ticker, id: id || null, price: null };
+      return {
+        ticker: a.ticker, id: r.id, name: r.name, image: r.image, price: r.current_price,
+        change24h: r.price_change_percentage_24h_in_currency ?? r.price_change_percentage_24h,
+        change7d: r.price_change_percentage_7d_in_currency ?? null,
+        marketCap: r.market_cap, volume24h: r.total_volume, rank: r.market_cap_rank,
+        sparkline: r.sparkline_in_7d?.price || [],
+      };
     });
-    res.json(data);
+    return { updatedAt: Date.now(), coins };
+  });
+}
+
+app.get('/api/markets', async (_req, res) => {
+  try {
+    res.json(await getMarkets());
   } catch (e) {
     res.status(e.status === 429 ? 503 : 502).json({ error: e.message });
   }
@@ -241,4 +252,5 @@ if (existsSync(dist)) {
 app.listen(PORT, () => {
   console.log(`Crypto Zones running on http://localhost:${PORT}${MOCK ? ' (mock data)' : ''}`);
   if (!MOCK) ensureIds().catch((e) => console.warn('ID resolution will retry:', e.message));
+  startAlerts({ assets, getMarkets });
 });
