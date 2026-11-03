@@ -7,11 +7,15 @@ import path from 'node:path';
 import { DATA_DIR, getHoldings, setHolding } from './holdings.js';
 
 const env = process.env;
-const TOKEN = env.TELEGRAM_BOT_TOKEN || '';
+// tolerate stray spaces/quotes from copy-paste
+const clean = (v) => String(v || '').trim().replace(/^['"]|['"]$/g, '').trim();
+const TOKEN = clean(env.TELEGRAM_BOT_TOKEN);
 const API = (env.TELEGRAM_API || 'https://api.telegram.org').replace(/\/$/, '');
 const FILE = path.join(DATA_DIR, 'telegram.json');
 
-let chatId = env.TELEGRAM_CHAT_ID || '';
+let chatId = clean(env.TELEGRAM_CHAT_ID);
+const status = { configured: !!TOKEN, bot: null, polling: false, lastError: null, lastMessageAt: null };
+export const telegramStatus = () => ({ ...status, connected: !!chatId });
 if (!chatId && existsSync(FILE)) {
   try { chatId = String(JSON.parse(readFileSync(FILE, 'utf8')).chatId || ''); } catch {}
 }
@@ -127,16 +131,29 @@ export function startTelegram({ assets, getMarkets, activeZone, fmt, fmtLevel, s
   // Long-poll for messages
   let offset = 0;
   const loop = async () => {
+    try {
+      const me = await call('getMe', {});
+      status.bot = '@' + me.username;
+      await call('deleteWebhook', {}).catch(() => {});
+    } catch (e) {
+      status.lastError = e.code === 401 || e.code === 404 ? 'Token rejected by Telegram: re-copy it from @BotFather' : e.message;
+      console.warn('Telegram:', status.lastError);
+      if (e.code === 401 || e.code === 404) return;
+    }
     for (;;) {
       try {
+        status.polling = true;
         const updates = await call('getUpdates', { offset, timeout: 25, allowed_updates: ['message'] });
+        status.lastError = null;
         for (const u of updates) {
+          status.lastMessageAt = new Date().toISOString();
           offset = u.update_id + 1;
           if (u.message) await handle(u.message).catch((e) => console.warn('Telegram reply failed:', e.message));
         }
       } catch (e) {
         // 409 = another copy of the server is polling (normal for a few seconds during a redeploy)
-        if (e.code === 401) { console.warn('Telegram token rejected — check TELEGRAM_BOT_TOKEN'); return; }
+        status.lastError = e.message;
+        if (e.code === 401 || e.code === 404) { status.polling = false; status.lastError = 'Token rejected by Telegram: re-copy it from @BotFather'; console.warn(status.lastError); return; }
         await new Promise((r) => setTimeout(r, e.code === 409 ? 10_000 : 5_000));
       }
     }

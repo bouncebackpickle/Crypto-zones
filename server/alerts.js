@@ -1,5 +1,5 @@
 import { getHoldings, isHolding } from './holdings.js';
-import { startTelegram, telegramSend, telegramReady, telegramConfigured } from './telegram.js';
+import { startTelegram, telegramSend, telegramReady, telegramConfigured, telegramStatus } from './telegram.js';
 // Zone-change alerts. Checks prices on a timer and notifies when a coin moves
 // into a different buy (ladder in) or sell (ladder out) zone.
 //
@@ -126,6 +126,7 @@ let lastError = null;
 export function alertStatus() {
   return {
     channels: channels(),
+    telegram: telegramStatus(),
     ladders: LADDERS,
     holdings: getHoldings(),
     checkEverySeconds: INTERVAL / 1000,
