@@ -41,20 +41,22 @@ npm run dev:mock   # fake data, no internet needed
 ## Zone-change alerts
 The server checks prices every 60 seconds, around the clock. When a coin moves into a different buy or sell zone and stays there for 2 checks in a row, you get a notification, e.g. "🔴 BTC → Aggressive buy zone".
 
-**Phone push (ntfy, free, no account):**
-1. Install the **ntfy** app (iPhone or Android).
-2. Tap **+** and subscribe to a topic name only you know, e.g. `dillon-zones-8k3q7x`. Anyone who knows the name can read the alerts, so make it hard to guess.
-3. In Railway → Variables, add `NTFY_TOPIC` set to that same name.
-4. Visit `your-site/api/alerts/test`; you should get a test notification.
+**Telegram (recommended: reliable phone notifications + text commands):**
+1. In Telegram, message **@BotFather** → `/newbot` → pick any name and a username ending in `bot`. Copy the token it gives you.
+2. In Railway → Variables, add `TELEGRAM_BOT_TOKEN` = that token and let it deploy.
+3. Open your new bot in Telegram and send `/start`. It replies "Connected!" and gives you a `TELEGRAM_CHAT_ID`. Add that as a Railway variable too, so the bot stays connected after redeploys.
+4. Bot commands: `/mycoins` (prices + zones), `/add AVAX LINK`, `/remove XRP`, `/test`, or send any ticker like `SOL` to see its zones.
+
+The bot only answers you (the first chat that sent `/start`).
 
 **Other channels** (optional, can be combined):
+- ntfy app: `NTFY_TOPIC` (push can be unreliable on iPhone)
 - Discord: `DISCORD_WEBHOOK_URL` (Channel settings → Integrations → Webhooks → Copy URL)
-- Telegram: `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`
 
 **Which coins alert: "My coins"**
 Only coins you hold send alerts. To change the list:
 - On the site, tap the 🔔 on any coin (or **Alerts on/off** in its detail panel). **🔔 My coins** filters the table to them.
-- Or open a URL "command": `your-site/api/holdings/add?coins=AVAX,LINK` or `your-site/api/holdings/remove?coins=XRP`
+- Or text the Telegram bot `/add AVAX` / `/remove XRP`, or open a URL "command": `your-site/api/holdings/add?coins=AVAX,LINK` or `your-site/api/holdings/remove?coins=XRP`
 - Only the owner can change the list: the first user in `APP_USERS`, or set `ADMIN_USER`. Other logins don't see the bells.
 - **Keep changes across redeploys:** in Railway, right-click the service → **Attach Volume** → mount path `/data`. Without a volume, the list resets to `alertHoldings` in `zones.json` on every deploy.
 

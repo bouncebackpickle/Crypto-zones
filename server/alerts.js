@@ -1,10 +1,11 @@
 import { getHoldings, isHolding } from './holdings.js';
+import { startTelegram, telegramSend, telegramReady, telegramConfigured } from './telegram.js';
 // Zone-change alerts. Checks prices on a timer and notifies when a coin moves
 // into a different buy (ladder in) or sell (ladder out) zone.
 //
 // Channels (set any of these in Railway → Variables; all set ones are used):
 //   NTFY_TOPIC            → push to the ntfy phone app (https://ntfy.sh)
-//   TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID → Telegram message
+//   TELEGRAM_BOT_TOKEN    → Telegram bot (send it /start to connect; see telegram.js)
 //   DISCORD_WEBHOOK_URL   → Discord channel message
 // Options:
 //   ALERT_LADDERS   "in", "out" or "in,out" (default both)
@@ -14,15 +15,13 @@ import { getHoldings, isHolding } from './holdings.js';
 const env = process.env;
 const NTFY_SERVER = (env.NTFY_SERVER || 'https://ntfy.sh').replace(/\/$/, '');
 const NTFY_TOPIC = env.NTFY_TOPIC || '';
-const TG_TOKEN = env.TELEGRAM_BOT_TOKEN || '';
-const TG_CHAT = env.TELEGRAM_CHAT_ID || '';
 const DISCORD = env.DISCORD_WEBHOOK_URL || '';
 const LADDERS = (env.ALERT_LADDERS || 'in,out').toLowerCase().split(',').map((s) => s.trim());
 const INTERVAL = Number(env.ALERT_INTERVAL_MS) || 60_000;
 const CONFIRM_CHECKS = 2; // a new zone must hold for 2 checks in a row (stops flip-flopping at a boundary)
 const SITE_URL = env.SITE_URL || (env.RAILWAY_PUBLIC_DOMAIN ? `https://${env.RAILWAY_PUBLIC_DOMAIN}` : '');
 
-const channels = () => [NTFY_TOPIC && 'ntfy', TG_TOKEN && TG_CHAT && 'telegram', DISCORD && 'discord'].filter(Boolean);
+const channels = () => [NTFY_TOPIC && 'ntfy', telegramReady() && 'telegram', DISCORD && 'discord'].filter(Boolean);
 
 // ---------- zone logic (same rules as the site) ----------
 export function activeZone(a, price, ladder) {
@@ -47,11 +46,17 @@ function fmt(n) {
   if (n >= 1) return '$' + n.toFixed(2);
   return '$' + Number(n.toPrecision(4));
 }
+function fmtLevel(n) {
+  if (n >= 1000) return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  if (n >= 1) return '$' + n.toFixed(2);
+  if (n >= 0.01) return '$' + n.toFixed(3);
+  return '$' + n.toFixed(4);
+}
 function zoneRange(a, ladder, zone) {
   const z = ladder === 'in' ? a.ladderIn : a.ladderOut;
-  if (zone === 'slow') return `${fmt(z.slow[0])}–${fmt(z.slow[1])}`;
-  if (zone === 'moderate') return `${fmt(z.moderate[0])}–${fmt(z.moderate[1])}`;
-  if (zone === 'aggressive') return ladder === 'in' ? `below ${fmt(z.aggressiveBelow)}` : `above ${fmt(z.aggressiveAbove)}`;
+  if (zone === 'slow') return `${fmtLevel(z.slow[0])}–${fmtLevel(z.slow[1])}`;
+  if (zone === 'moderate') return `${fmtLevel(z.moderate[0])}–${fmtLevel(z.moderate[1])}`;
+  if (zone === 'aggressive') return ladder === 'in' ? `below ${fmtLevel(z.aggressiveBelow)}` : `above ${fmtLevel(z.aggressiveAbove)}`;
   return '';
 }
 
@@ -86,13 +91,12 @@ async function send({ title, body, priority = 'default', tag = 'bell' }) {
       }).then((r) => (results.ntfy = r.ok ? 'sent' : `error ${r.status}`))
     );
   }
-  if (TG_TOKEN && TG_CHAT) {
+  if (telegramReady()) {
+    const html = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     jobs.push(
-      fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ chat_id: TG_CHAT, text: `${title}\n${body}${SITE_URL ? `\n${SITE_URL}` : ''}`, disable_web_page_preview: true }),
-      }).then((r) => (results.telegram = r.ok ? 'sent' : `error ${r.status}`))
+      telegramSend(`<b>${html(title)}</b>\n${html(body)}${SITE_URL ? `\n${SITE_URL}` : ''}`)
+        .then((r) => (results.telegram = r))
+        .catch((e) => (results.telegram = `error: ${e.message}`))
     );
   }
   if (DISCORD) {
@@ -132,7 +136,14 @@ export function alertStatus() {
 }
 
 export async function sendTestAlert() {
-  if (!channels().length) return { ok: false, message: 'No alert channel set. Add NTFY_TOPIC (or Telegram/Discord) in Railway → Variables.' };
+  if (!channels().length) {
+    return {
+      ok: false,
+      message: telegramConfigured()
+        ? 'Telegram bot is set up but not connected yet: open your bot in Telegram and send /start.'
+        : 'No alert channel set. Add TELEGRAM_BOT_TOKEN (or NTFY_TOPIC / DISCORD_WEBHOOK_URL) in Railway → Variables.',
+    };
+  }
   const results = await send({ title: '✅ Crypto Zones test alert', body: 'Alerts are working. You will get a message whenever a coin moves into a different buy or sell zone.', tag: 'white_check_mark' });
   return { ok: true, results };
 }
@@ -174,4 +185,5 @@ export function startAlerts({ assets, getMarkets }) {
   console.log(`Zone alerts: checking every ${INTERVAL / 1000}s via ${channels().join(', ') || 'no channel yet (logs only)'}`);
   setTimeout(tick, 5_000);
   setInterval(tick, INTERVAL);
+  startTelegram({ assets, getMarkets, activeZone, fmt, fmtLevel, siteUrl: SITE_URL });
 }

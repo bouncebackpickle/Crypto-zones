@@ -5,7 +5,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
 
 const env = process.env;
-const DATA_DIR = env.DATA_DIR || env.RAILWAY_VOLUME_MOUNT_PATH || path.resolve('data');
+export const DATA_DIR = env.DATA_DIR || env.RAILWAY_VOLUME_MOUNT_PATH || path.resolve('data');
 const FILE = path.join(DATA_DIR, 'holdings.json');
 // Persistent unless we're on Railway with no volume attached
 export const PERSISTENT = !!(env.DATA_DIR || env.RAILWAY_VOLUME_MOUNT_PATH) || !env.RAILWAY_ENVIRONMENT;
