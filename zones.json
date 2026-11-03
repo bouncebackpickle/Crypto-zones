@@ -1,0 +1,1441 @@
+{
+  "source": "Transcribed from my DCA research screenshots",
+  "zonesAsOf": "2026-11-03",
+  "notes": [
+    "ladderIn: price above slow[1] = 'Above Zones'; inside slow = Slow; inside moderate = Moderate; below aggressiveBelow = Aggressive.",
+    "ladderOut: price below slow[0] = 'Below Zones'; inside slow = Slow; inside moderate = Moderate; above aggressiveAbove = Aggressive.",
+    "snapshotPrice = price on zonesAsOf. coingeckoId is a best guess; the server checks each one against snapshotPrice and auto-resolves (by symbol + closest price) when it's null or clearly wrong. Visit /api/ids to see what each ticker resolved to.",
+    "LIT ladderOut has a gap (slow ends 4.00, moderate starts 4.50) \u2014 transcribed as shown; double-check against source.",
+    "Higher DCA Zones section not included yet (no screenshots of its rows)."
+  ],
+  "assets": [
+    {
+      "ticker": "BTC",
+      "tier": "core",
+      "snapshotPrice": 77554.0,
+      "coingeckoId": "bitcoin",
+      "ladderIn": {
+        "slow": [
+          72000.0,
+          80000.0
+        ],
+        "moderate": [
+          58000.0,
+          72000.0
+        ],
+        "aggressiveBelow": 58000.0
+      },
+      "ladderOut": {
+        "slow": [
+          152000.0,
+          169000.0
+        ],
+        "moderate": [
+          169000.0,
+          195000.0
+        ],
+        "aggressiveAbove": 195000.0
+      }
+    },
+    {
+      "ticker": "ETH",
+      "tier": "core",
+      "snapshotPrice": 2295.79,
+      "coingeckoId": "ethereum",
+      "ladderIn": {
+        "slow": [
+          2100.0,
+          2500.0
+        ],
+        "moderate": [
+          1700.0,
+          2100.0
+        ],
+        "aggressiveBelow": 1700.0
+      },
+      "ladderOut": {
+        "slow": [
+          5000.0,
+          6000.0
+        ],
+        "moderate": [
+          6000.0,
+          7500.0
+        ],
+        "aggressiveAbove": 7500.0
+      }
+    },
+    {
+      "ticker": "BNB",
+      "tier": "core",
+      "snapshotPrice": 700.3,
+      "coingeckoId": "binancecoin",
+      "ladderIn": {
+        "slow": [
+          580.0,
+          670.0
+        ],
+        "moderate": [
+          480.0,
+          580.0
+        ],
+        "aggressiveBelow": 480.0
+      },
+      "ladderOut": {
+        "slow": [
+          1380.0,
+          1650.0
+        ],
+        "moderate": [
+          1650.0,
+          1950.0
+        ],
+        "aggressiveAbove": 1950.0
+      }
+    },
+    {
+      "ticker": "SOL",
+      "tier": "core",
+      "snapshotPrice": 93.56,
+      "coingeckoId": "solana",
+      "ladderIn": {
+        "slow": [
+          90.0,
+          120.0
+        ],
+        "moderate": [
+          70.0,
+          90.0
+        ],
+        "aggressiveBelow": 70.0
+      },
+      "ladderOut": {
+        "slow": [
+          300.0,
+          380.0
+        ],
+        "moderate": [
+          380.0,
+          450.0
+        ],
+        "aggressiveAbove": 450.0
+      }
+    },
+    {
+      "ticker": "HYPE",
+      "tier": "core",
+      "snapshotPrice": 87.17,
+      "coingeckoId": "hyperliquid",
+      "ladderIn": {
+        "slow": [
+          54.0,
+          62.0
+        ],
+        "moderate": [
+          46.0,
+          54.0
+        ],
+        "aggressiveBelow": 46.0
+      },
+      "ladderOut": {
+        "slow": [
+          127.0,
+          138.0
+        ],
+        "moderate": [
+          138.0,
+          152.0
+        ],
+        "aggressiveAbove": 152.0
+      }
+    },
+    {
+      "ticker": "XRP",
+      "tier": "core",
+      "snapshotPrice": 1.28,
+      "coingeckoId": "ripple",
+      "ladderIn": {
+        "slow": [
+          1.5,
+          2.0
+        ],
+        "moderate": [
+          1.0,
+          1.5
+        ],
+        "aggressiveBelow": 1.0
+      },
+      "ladderOut": {
+        "slow": [
+          3.6,
+          4.4
+        ],
+        "moderate": [
+          4.4,
+          5.5
+        ],
+        "aggressiveAbove": 5.5
+      }
+    },
+    {
+      "ticker": "LINK",
+      "tier": "core",
+      "snapshotPrice": 11.15,
+      "coingeckoId": "chainlink",
+      "ladderIn": {
+        "slow": [
+          10.0,
+          12.0
+        ],
+        "moderate": [
+          8.0,
+          10.0
+        ],
+        "aggressiveBelow": 8.0
+      },
+      "ladderOut": {
+        "slow": [
+          30.0,
+          37.0
+        ],
+        "moderate": [
+          37.0,
+          44.0
+        ],
+        "aggressiveAbove": 44.0
+      }
+    },
+    {
+      "ticker": "TRX",
+      "tier": "core",
+      "snapshotPrice": 0.3224,
+      "coingeckoId": "tron",
+      "ladderIn": {
+        "slow": [
+          0.25,
+          0.3
+        ],
+        "moderate": [
+          0.2,
+          0.25
+        ],
+        "aggressiveBelow": 0.2
+      },
+      "ladderOut": {
+        "slow": [
+          0.7,
+          0.76
+        ],
+        "moderate": [
+          0.76,
+          0.85
+        ],
+        "aggressiveAbove": 0.85
+      }
+    },
+    {
+      "ticker": "CC",
+      "tier": "core",
+      "snapshotPrice": 0.096,
+      "coingeckoId": "canton-network",
+      "ladderIn": {
+        "slow": [
+          0.14,
+          0.165
+        ],
+        "moderate": [
+          0.11,
+          0.14
+        ],
+        "aggressiveBelow": 0.11
+      },
+      "ladderOut": {
+        "slow": [
+          0.33,
+          0.38
+        ],
+        "moderate": [
+          0.38,
+          0.43
+        ],
+        "aggressiveAbove": 0.43
+      }
+    },
+    {
+      "ticker": "TAO",
+      "tier": "core",
+      "snapshotPrice": 227.31,
+      "coingeckoId": "bittensor",
+      "ladderIn": {
+        "slow": [
+          220.0,
+          250.0
+        ],
+        "moderate": [
+          180.0,
+          220.0
+        ],
+        "aggressiveBelow": 180.0
+      },
+      "ladderOut": {
+        "slow": [
+          750.0,
+          890.0
+        ],
+        "moderate": [
+          890.0,
+          970.0
+        ],
+        "aggressiveAbove": 970.0
+      }
+    },
+    {
+      "ticker": "UNI",
+      "tier": "core",
+      "snapshotPrice": 7.36,
+      "coingeckoId": "uniswap",
+      "ladderIn": {
+        "slow": [
+          4.0,
+          5.0
+        ],
+        "moderate": [
+          3.0,
+          4.0
+        ],
+        "aggressiveBelow": 3.0
+      },
+      "ladderOut": {
+        "slow": [
+          15.0,
+          19.0
+        ],
+        "moderate": [
+          19.0,
+          25.0
+        ],
+        "aggressiveAbove": 25.0
+      }
+    },
+    {
+      "ticker": "SKY",
+      "tier": "core",
+      "snapshotPrice": 0.0654,
+      "coingeckoId": "sky",
+      "ladderIn": {
+        "slow": [
+          0.07,
+          0.08
+        ],
+        "moderate": [
+          0.055,
+          0.07
+        ],
+        "aggressiveBelow": 0.055
+      },
+      "ladderOut": {
+        "slow": [
+          0.19,
+          0.21
+        ],
+        "moderate": [
+          0.21,
+          0.23
+        ],
+        "aggressiveAbove": 0.23
+      }
+    },
+    {
+      "ticker": "NEAR",
+      "tier": "core",
+      "snapshotPrice": 3.85,
+      "coingeckoId": "near",
+      "ladderIn": {
+        "slow": [
+          1.5,
+          2.5
+        ],
+        "moderate": [
+          1.0,
+          1.5
+        ],
+        "aggressiveBelow": 1.0
+      },
+      "ladderOut": {
+        "slow": [
+          7.0,
+          8.5
+        ],
+        "moderate": [
+          8.5,
+          10.0
+        ],
+        "aggressiveAbove": 10.0
+      }
+    },
+    {
+      "ticker": "AAVE",
+      "tier": "core",
+      "snapshotPrice": 128.42,
+      "coingeckoId": "aave",
+      "ladderIn": {
+        "slow": [
+          100.0,
+          120.0
+        ],
+        "moderate": [
+          80.0,
+          100.0
+        ],
+        "aggressiveBelow": 80.0
+      },
+      "ladderOut": {
+        "slow": [
+          400.0,
+          480.0
+        ],
+        "moderate": [
+          480.0,
+          540.0
+        ],
+        "aggressiveAbove": 540.0
+      }
+    },
+    {
+      "ticker": "ONDO",
+      "tier": "core",
+      "snapshotPrice": 0.3897,
+      "coingeckoId": "ondo-finance",
+      "ladderIn": {
+        "slow": [
+          0.3,
+          0.4
+        ],
+        "moderate": [
+          0.24,
+          0.3
+        ],
+        "aggressiveBelow": 0.24
+      },
+      "ladderOut": {
+        "slow": [
+          2.1,
+          2.6
+        ],
+        "moderate": [
+          2.6,
+          3.3
+        ],
+        "aggressiveAbove": 3.3
+      }
+    },
+    {
+      "ticker": "MORPHO",
+      "tier": "core",
+      "snapshotPrice": 2.14,
+      "coingeckoId": "morpho",
+      "ladderIn": {
+        "slow": [
+          1.7,
+          1.9
+        ],
+        "moderate": [
+          1.45,
+          1.7
+        ],
+        "aggressiveBelow": 1.45
+      },
+      "ladderOut": {
+        "slow": [
+          5.0,
+          6.0
+        ],
+        "moderate": [
+          6.0,
+          7.0
+        ],
+        "aggressiveAbove": 7.0
+      }
+    },
+    {
+      "ticker": "ZEC",
+      "tier": "core",
+      "snapshotPrice": 1206.88,
+      "coingeckoId": "zcash",
+      "ladderIn": {
+        "slow": [
+          358.0,
+          409.0
+        ],
+        "moderate": [
+          288.0,
+          358.0
+        ],
+        "aggressiveBelow": 288.0
+      },
+      "ladderOut": {
+        "slow": [
+          916.0,
+          1020.0
+        ],
+        "moderate": [
+          1020.0,
+          1100.0
+        ],
+        "aggressiveAbove": 1100.0
+      }
+    },
+    {
+      "ticker": "GRAM",
+      "tier": "core",
+      "snapshotPrice": 1.18,
+      "coingeckoId": null,
+      "ladderIn": {
+        "slow": [
+          2.0,
+          2.5
+        ],
+        "moderate": [
+          1.5,
+          2.0
+        ],
+        "aggressiveBelow": 1.5
+      },
+      "ladderOut": {
+        "slow": [
+          6.7,
+          8.3
+        ],
+        "moderate": [
+          8.3,
+          9.7
+        ],
+        "aggressiveAbove": 9.7
+      }
+    },
+    {
+      "ticker": "AERO",
+      "tier": "core",
+      "snapshotPrice": 0.6156,
+      "coingeckoId": "aerodrome-finance",
+      "ladderIn": {
+        "slow": [
+          0.45,
+          0.6
+        ],
+        "moderate": [
+          0.3,
+          0.45
+        ],
+        "aggressiveBelow": 0.3
+      },
+      "ladderOut": {
+        "slow": [
+          2.6,
+          2.9
+        ],
+        "moderate": [
+          2.9,
+          3.4
+        ],
+        "aggressiveAbove": 3.4
+      }
+    },
+    {
+      "ticker": "CFG",
+      "tier": "core",
+      "snapshotPrice": 0.0928,
+      "coingeckoId": "centrifuge",
+      "ladderIn": {
+        "slow": [
+          0.25,
+          0.4
+        ],
+        "moderate": [
+          0.15,
+          0.25
+        ],
+        "aggressiveBelow": 0.15
+      },
+      "ladderOut": {
+        "slow": [
+          1.15,
+          1.4
+        ],
+        "moderate": [
+          1.4,
+          1.7
+        ],
+        "aggressiveAbove": 1.7
+      }
+    },
+    {
+      "ticker": "LDO",
+      "tier": "core",
+      "snapshotPrice": 0.3361,
+      "coingeckoId": "lido-dao",
+      "ladderIn": {
+        "slow": [
+          0.45,
+          0.6
+        ],
+        "moderate": [
+          0.3,
+          0.45
+        ],
+        "aggressiveBelow": 0.3
+      },
+      "ladderOut": {
+        "slow": [
+          3.1,
+          3.9
+        ],
+        "moderate": [
+          3.9,
+          4.8
+        ],
+        "aggressiveAbove": 4.8
+      }
+    },
+    {
+      "ticker": "MET",
+      "tier": "core",
+      "snapshotPrice": 0.2721,
+      "coingeckoId": "meteora",
+      "ladderIn": {
+        "slow": [
+          0.145,
+          0.16
+        ],
+        "moderate": [
+          0.13,
+          0.145
+        ],
+        "aggressiveBelow": 0.13
+      },
+      "ladderOut": {
+        "slow": [
+          0.6,
+          0.75
+        ],
+        "moderate": [
+          0.75,
+          0.9
+        ],
+        "aggressiveAbove": 0.9
+      }
+    },
+    {
+      "ticker": "META",
+      "tier": "core",
+      "snapshotPrice": 4.34,
+      "coingeckoId": null,
+      "ladderIn": {
+        "slow": [
+          2.5,
+          3.0
+        ],
+        "moderate": [
+          2.0,
+          2.5
+        ],
+        "aggressiveBelow": 2.0
+      },
+      "ladderOut": {
+        "slow": [
+          10.0,
+          13.0
+        ],
+        "moderate": [
+          13.0,
+          15.0
+        ],
+        "aggressiveAbove": 15.0
+      }
+    },
+    {
+      "ticker": "PENDLE",
+      "tier": "core",
+      "snapshotPrice": 1.75,
+      "coingeckoId": "pendle",
+      "ladderIn": {
+        "slow": [
+          1.5,
+          2.5
+        ],
+        "moderate": [
+          1.0,
+          1.5
+        ],
+        "aggressiveBelow": 1.0
+      },
+      "ladderOut": {
+        "slow": [
+          7.5,
+          9.0
+        ],
+        "moderate": [
+          9.0,
+          10.5
+        ],
+        "aggressiveAbove": 10.5
+      }
+    },
+    {
+      "ticker": "RAY",
+      "tier": "core",
+      "snapshotPrice": 1.56,
+      "coingeckoId": "raydium",
+      "ladderIn": {
+        "slow": [
+          0.7,
+          0.85
+        ],
+        "moderate": [
+          0.55,
+          0.7
+        ],
+        "aggressiveBelow": 0.55
+      },
+      "ladderOut": {
+        "slow": [
+          7.0,
+          8.5
+        ],
+        "moderate": [
+          8.5,
+          10.0
+        ],
+        "aggressiveAbove": 10.0
+      }
+    },
+    {
+      "ticker": "SYRUP",
+      "tier": "core",
+      "snapshotPrice": 0.1581,
+      "coingeckoId": "syrup",
+      "ladderIn": {
+        "slow": [
+          0.3,
+          0.4
+        ],
+        "moderate": [
+          0.2,
+          0.3
+        ],
+        "aggressiveBelow": 0.2
+      },
+      "ladderOut": {
+        "slow": [
+          1.4,
+          1.6
+        ],
+        "moderate": [
+          1.6,
+          2.0
+        ],
+        "aggressiveAbove": 2.0
+      }
+    },
+    {
+      "ticker": "VIRTUAL",
+      "tier": "core",
+      "snapshotPrice": 0.5928,
+      "coingeckoId": "virtual-protocol",
+      "ladderIn": {
+        "slow": [
+          0.7,
+          0.8
+        ],
+        "moderate": [
+          0.6,
+          0.7
+        ],
+        "aggressiveBelow": 0.6
+      },
+      "ladderOut": {
+        "slow": [
+          4.2,
+          5.2
+        ],
+        "moderate": [
+          5.2,
+          6.3
+        ],
+        "aggressiveAbove": 6.3
+      }
+    },
+    {
+      "ticker": "DRV",
+      "tier": "speculative",
+      "snapshotPrice": 0.3053,
+      "coingeckoId": "derive",
+      "ladderIn": {
+        "slow": [
+          0.13,
+          0.2
+        ],
+        "moderate": [
+          0.08,
+          0.13
+        ],
+        "aggressiveBelow": 0.08
+      },
+      "ladderOut": {
+        "slow": [
+          0.5,
+          0.6
+        ],
+        "moderate": [
+          0.6,
+          0.73
+        ],
+        "aggressiveAbove": 0.73
+      }
+    },
+    {
+      "ticker": "AVAX",
+      "tier": "speculative",
+      "snapshotPrice": 8.56,
+      "coingeckoId": "avalanche-2",
+      "ladderIn": {
+        "slow": [
+          10.0,
+          12.0
+        ],
+        "moderate": [
+          8.0,
+          10.0
+        ],
+        "aggressiveBelow": 8.0
+      },
+      "ladderOut": {
+        "slow": [
+          40.0,
+          50.0
+        ],
+        "moderate": [
+          50.0,
+          60.0
+        ],
+        "aggressiveAbove": 60.0
+      }
+    },
+    {
+      "ticker": "ASTER",
+      "tier": "speculative",
+      "snapshotPrice": 0.7031,
+      "coingeckoId": "aster-2",
+      "ladderIn": {
+        "slow": [
+          0.7,
+          0.8
+        ],
+        "moderate": [
+          0.6,
+          0.7
+        ],
+        "aggressiveBelow": 0.6
+      },
+      "ladderOut": {
+        "slow": [
+          3.0,
+          3.5
+        ],
+        "moderate": [
+          3.5,
+          4.0
+        ],
+        "aggressiveAbove": 4.0
+      }
+    },
+    {
+      "ticker": "ENA",
+      "tier": "speculative",
+      "snapshotPrice": 0.1712,
+      "coingeckoId": "ethena",
+      "ladderIn": {
+        "slow": [
+          0.2,
+          0.25
+        ],
+        "moderate": [
+          0.15,
+          0.2
+        ],
+        "aggressiveBelow": 0.15
+      },
+      "ladderOut": {
+        "slow": [
+          0.8,
+          1.0
+        ],
+        "moderate": [
+          1.0,
+          1.2
+        ],
+        "aggressiveAbove": 1.2
+      }
+    },
+    {
+      "ticker": "PUMP",
+      "tier": "speculative",
+      "snapshotPrice": 0.004238,
+      "coingeckoId": "pump-fun",
+      "ladderIn": {
+        "slow": [
+          0.002,
+          0.003
+        ],
+        "moderate": [
+          0.001,
+          0.002
+        ],
+        "aggressiveBelow": 0.001
+      },
+      "ladderOut": {
+        "slow": [
+          0.013,
+          0.015
+        ],
+        "moderate": [
+          0.015,
+          0.017
+        ],
+        "aggressiveAbove": 0.017
+      }
+    },
+    {
+      "ticker": "ZRO",
+      "tier": "speculative",
+      "snapshotPrice": 1.89,
+      "coingeckoId": "layerzero",
+      "ladderIn": {
+        "slow": [
+          2.0,
+          2.5
+        ],
+        "moderate": [
+          1.5,
+          2.0
+        ],
+        "aggressiveBelow": 1.5
+      },
+      "ladderOut": {
+        "slow": [
+          6.0,
+          7.5
+        ],
+        "moderate": [
+          7.5,
+          9.0
+        ],
+        "aggressiveAbove": 9.0
+      }
+    },
+    {
+      "ticker": "JUP",
+      "tier": "speculative",
+      "snapshotPrice": 0.2484,
+      "coingeckoId": "jupiter-exchange-solana",
+      "ladderIn": {
+        "slow": [
+          0.2,
+          0.25
+        ],
+        "moderate": [
+          0.15,
+          0.2
+        ],
+        "aggressiveBelow": 0.15
+      },
+      "ladderOut": {
+        "slow": [
+          1.5,
+          1.8
+        ],
+        "moderate": [
+          1.8,
+          2.2
+        ],
+        "aggressiveAbove": 2.2
+      }
+    },
+    {
+      "ticker": "VVV",
+      "tier": "speculative",
+      "snapshotPrice": 22.23,
+      "coingeckoId": "venice-token",
+      "ladderIn": {
+        "slow": [
+          8.0,
+          9.5
+        ],
+        "moderate": [
+          6.5,
+          8.0
+        ],
+        "aggressiveBelow": 6.5
+      },
+      "ladderOut": {
+        "slow": [
+          23.0,
+          26.0
+        ],
+        "moderate": [
+          26.0,
+          29.0
+        ],
+        "aggressiveAbove": 29.0
+      }
+    },
+    {
+      "ticker": "ETHFI",
+      "tier": "speculative",
+      "snapshotPrice": 0.5835,
+      "coingeckoId": "ether-fi",
+      "ladderIn": {
+        "slow": [
+          0.55,
+          0.7
+        ],
+        "moderate": [
+          0.4,
+          0.55
+        ],
+        "aggressiveBelow": 0.4
+      },
+      "ladderOut": {
+        "slow": [
+          4.5,
+          5.5
+        ],
+        "moderate": [
+          5.5,
+          6.5
+        ],
+        "aggressiveAbove": 6.5
+      }
+    },
+    {
+      "ticker": "INJ",
+      "tier": "speculative",
+      "snapshotPrice": 7.33,
+      "coingeckoId": "injective-protocol",
+      "ladderIn": {
+        "slow": [
+          5.5,
+          7.0
+        ],
+        "moderate": [
+          4.0,
+          5.5
+        ],
+        "aggressiveBelow": 4.0
+      },
+      "ladderOut": {
+        "slow": [
+          28.0,
+          33.0
+        ],
+        "moderate": [
+          33.0,
+          38.0
+        ],
+        "aggressiveAbove": 38.0
+      }
+    },
+    {
+      "ticker": "LIT",
+      "tier": "speculative",
+      "snapshotPrice": 3.35,
+      "coingeckoId": null,
+      "ladderIn": {
+        "slow": [
+          1.1,
+          1.3
+        ],
+        "moderate": [
+          0.9,
+          1.1
+        ],
+        "aggressiveBelow": 0.9
+      },
+      "ladderOut": {
+        "slow": [
+          3.5,
+          4.0
+        ],
+        "moderate": [
+          4.5,
+          5.0
+        ],
+        "aggressiveAbove": 5.0
+      }
+    },
+    {
+      "ticker": "PYTH",
+      "tier": "speculative",
+      "snapshotPrice": 0.0646,
+      "coingeckoId": "pyth-network",
+      "ladderIn": {
+        "slow": [
+          0.05,
+          0.065
+        ],
+        "moderate": [
+          0.035,
+          0.05
+        ],
+        "aggressiveBelow": 0.035
+      },
+      "ladderOut": {
+        "slow": [
+          0.45,
+          0.55
+        ],
+        "moderate": [
+          0.55,
+          0.65
+        ],
+        "aggressiveAbove": 0.65
+      }
+    },
+    {
+      "ticker": "JTO",
+      "tier": "speculative",
+      "snapshotPrice": 0.3405,
+      "coingeckoId": "jito-governance-token",
+      "ladderIn": {
+        "slow": [
+          0.4,
+          0.55
+        ],
+        "moderate": [
+          0.25,
+          0.4
+        ],
+        "aggressiveBelow": 0.25
+      },
+      "ladderOut": {
+        "slow": [
+          2.5,
+          3.3
+        ],
+        "moderate": [
+          3.3,
+          4.2
+        ],
+        "aggressiveAbove": 4.2
+      }
+    },
+    {
+      "ticker": "HNT",
+      "tier": "speculative",
+      "snapshotPrice": 0.3454,
+      "coingeckoId": "helium",
+      "ladderIn": {
+        "slow": [
+          1.5,
+          2.0
+        ],
+        "moderate": [
+          1.0,
+          1.5
+        ],
+        "aggressiveBelow": 1.0
+      },
+      "ladderOut": {
+        "slow": [
+          7.0,
+          8.0
+        ],
+        "moderate": [
+          8.0,
+          9.0
+        ],
+        "aggressiveAbove": 9.0
+      }
+    },
+    {
+      "ticker": "ATH",
+      "tier": "speculative",
+      "snapshotPrice": 0.004988,
+      "coingeckoId": "aethir",
+      "ladderIn": {
+        "slow": [
+          0.007,
+          0.0085
+        ],
+        "moderate": [
+          0.0055,
+          0.007
+        ],
+        "aggressiveBelow": 0.0055
+      },
+      "ladderOut": {
+        "slow": [
+          0.045,
+          0.06
+        ],
+        "moderate": [
+          0.06,
+          0.075
+        ],
+        "aggressiveAbove": 0.075
+      }
+    },
+    {
+      "ticker": "KMNO",
+      "tier": "speculative",
+      "snapshotPrice": 0.0336,
+      "coingeckoId": "kamino",
+      "ladderIn": {
+        "slow": [
+          0.03,
+          0.04
+        ],
+        "moderate": [
+          0.02,
+          0.03
+        ],
+        "aggressiveBelow": 0.02
+      },
+      "ladderOut": {
+        "slow": [
+          0.14,
+          0.17
+        ],
+        "moderate": [
+          0.17,
+          0.21
+        ],
+        "aggressiveAbove": 0.21
+      }
+    },
+    {
+      "ticker": "RAIL",
+      "tier": "speculative",
+      "snapshotPrice": 2.16,
+      "coingeckoId": "railgun",
+      "ladderIn": {
+        "slow": [
+          1.5,
+          2.0
+        ],
+        "moderate": [
+          1.0,
+          1.5
+        ],
+        "aggressiveBelow": 1.0
+      },
+      "ladderOut": {
+        "slow": [
+          5.5,
+          7.0
+        ],
+        "moderate": [
+          7.0,
+          8.5
+        ],
+        "aggressiveAbove": 8.5
+      }
+    },
+    {
+      "ticker": "GEOD",
+      "tier": "speculative",
+      "snapshotPrice": 0.2323,
+      "coingeckoId": "geodnet",
+      "ladderIn": {
+        "slow": [
+          0.2,
+          0.25
+        ],
+        "moderate": [
+          0.15,
+          0.2
+        ],
+        "aggressiveBelow": 0.15
+      },
+      "ladderOut": {
+        "slow": [
+          1.0,
+          1.2
+        ],
+        "moderate": [
+          1.2,
+          1.4
+        ],
+        "aggressiveAbove": 1.4
+      }
+    },
+    {
+      "ticker": "RED",
+      "tier": "speculative",
+      "snapshotPrice": 0.1382,
+      "coingeckoId": "redstone-oracles",
+      "ladderIn": {
+        "slow": [
+          0.2,
+          0.3
+        ],
+        "moderate": [
+          0.1,
+          0.2
+        ],
+        "aggressiveBelow": 0.1
+      },
+      "ladderOut": {
+        "slow": [
+          1.0,
+          1.2
+        ],
+        "moderate": [
+          1.2,
+          1.4
+        ],
+        "aggressiveAbove": 1.4
+      }
+    },
+    {
+      "ticker": "PLUME",
+      "tier": "speculative",
+      "snapshotPrice": 0.0146,
+      "coingeckoId": "plume",
+      "ladderIn": {
+        "slow": [
+          0.015,
+          0.02
+        ],
+        "moderate": [
+          0.01,
+          0.015
+        ],
+        "aggressiveBelow": 0.01
+      },
+      "ladderOut": {
+        "slow": [
+          0.13,
+          0.15
+        ],
+        "moderate": [
+          0.15,
+          0.17
+        ],
+        "aggressiveAbove": 0.17
+      }
+    },
+    {
+      "ticker": "AVNT",
+      "tier": "speculative",
+      "snapshotPrice": 0.0872,
+      "coingeckoId": "avantis",
+      "ladderIn": {
+        "slow": [
+          0.2,
+          0.3
+        ],
+        "moderate": [
+          0.1,
+          0.2
+        ],
+        "aggressiveBelow": 0.1
+      },
+      "ladderOut": {
+        "slow": [
+          1.4,
+          1.7
+        ],
+        "moderate": [
+          1.7,
+          2.1
+        ],
+        "aggressiveAbove": 2.1
+      }
+    },
+    {
+      "ticker": "EUL",
+      "tier": "speculative",
+      "snapshotPrice": 1.03,
+      "coingeckoId": "euler",
+      "ladderIn": {
+        "slow": [
+          1.5,
+          2.0
+        ],
+        "moderate": [
+          1.0,
+          1.5
+        ],
+        "aggressiveBelow": 1.0
+      },
+      "ladderOut": {
+        "slow": [
+          8.0,
+          10.0
+        ],
+        "moderate": [
+          10.0,
+          12.0
+        ],
+        "aggressiveAbove": 12.0
+      }
+    },
+    {
+      "ticker": "KNTQ",
+      "tier": "speculative",
+      "snapshotPrice": 0.4909,
+      "coingeckoId": null,
+      "ladderIn": {
+        "slow": [
+          0.25,
+          0.29
+        ],
+        "moderate": [
+          0.19,
+          0.25
+        ],
+        "aggressiveBelow": 0.19
+      },
+      "ladderOut": {
+        "slow": [
+          1.75,
+          2.25
+        ],
+        "moderate": [
+          2.25,
+          2.75
+        ],
+        "aggressiveAbove": 2.75
+      }
+    },
+    {
+      "ticker": "ARX",
+      "tier": "speculative",
+      "snapshotPrice": 0.2167,
+      "coingeckoId": null,
+      "ladderIn": {
+        "slow": [
+          0.25,
+          0.3
+        ],
+        "moderate": [
+          0.2,
+          0.25
+        ],
+        "aggressiveBelow": 0.2
+      },
+      "ladderOut": {
+        "slow": [
+          1.25,
+          1.5
+        ],
+        "moderate": [
+          1.5,
+          2.0
+        ],
+        "aggressiveAbove": 2.0
+      }
+    }
+  ]
+}
