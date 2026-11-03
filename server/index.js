@@ -10,6 +10,15 @@ const PORT = Number(process.env.PORT) || 8787;
 const API_KEY = process.env.COINGECKO_API_KEY || '';
 const APP_USERNAME = process.env.APP_USERNAME || '';
 const APP_PASSWORD = process.env.APP_PASSWORD || '';
+// APP_USERS="dillon:pass1,alex:pass2" — one entry per person (passwords can't contain commas)
+const USERS = new Map(
+  (process.env.APP_USERS || '')
+    .split(',')
+    .map((e) => e.trim())
+    .filter((e) => e.includes(':'))
+    .map((e) => [e.slice(0, e.indexOf(':')).trim(), e.slice(e.indexOf(':') + 1)])
+);
+const AUTH_ON = USERS.size > 0 || !!APP_PASSWORD;
 const MOCK = process.env.MOCK === '1';
 const CG = 'https://api.coingecko.com/api/v3';
 
@@ -124,15 +133,15 @@ function mockChart(ticker, days) {
 const app = express();
 app.disable('x-powered-by');
 
-if (APP_PASSWORD) {
+if (AUTH_ON) {
   app.use((req, res, next) => {
     const [, b64] = (req.headers.authorization || '').split(' ');
     const decoded = b64 ? Buffer.from(b64, 'base64').toString() : '';
     const i = decoded.indexOf(':');
     const user = i >= 0 ? decoded.slice(0, i) : '';
     const pass = i >= 0 ? decoded.slice(i + 1) : '';
-    const userOk = !APP_USERNAME || user === APP_USERNAME;
-    if (userOk && pass === APP_PASSWORD) return next();
+    if (USERS.has(user) && USERS.get(user) === pass) return next();
+    if (APP_PASSWORD && (!APP_USERNAME || user === APP_USERNAME) && pass === APP_PASSWORD) return next();
     res.set('WWW-Authenticate', 'Basic realm="Crypto Zones"').status(401).send('Password required');
   });
 }

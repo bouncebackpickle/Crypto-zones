@@ -35,7 +35,8 @@ npm run dev:mock   # fake data, no internet needed
 2. Service → **Settings → Networking → Generate Domain** to get your link.
 3. Optional **Variables**:
    - `COINGECKO_API_KEY`: a free CoinGecko demo key (coingecko.com/en/api) for higher rate limits
-   - `APP_USERNAME` + `APP_PASSWORD`: put the site behind a login prompt (both must match; if you only set the password, any username works)
+   - `APP_USERS`: logins for everyone who can see the site, written as `name:password` pairs separated by commas, e.g. `dillon:MyPass123,alex:HisPass456`. To remove someone, delete their pair and save.
+   - (`APP_USERNAME` + `APP_PASSWORD` still work for a single login.)
 
 ## How it works
 - `server/index.js`: a small Express server. It serves the site and proxies CoinGecko. Prices are cached for 60s and coin details for 24h, so every visitor shares one set of API calls and the key never reaches the browser.
