@@ -5,7 +5,7 @@ A personal dashboard for DCA buy zones (ladder in) and sell zones (ladder out), 
 - **Ladder In / Ladder Out tabs**: every coin's active zone, distance to the next zone and a 7-day sparkline
 - **Summary strip**: how many coins sit in each zone (tap one to filter)
 - **Watchlist**: star coins (saved in your browser)
-- **Coin drawer**: tap any coin to see a price chart with the zones shaded, both ladders, a short description, market stats and links
+- **Coin drawer**: tap any coin to see a price chart with the zones shaded (1D → All-time, or custom dates; drag/pinch to zoom; log scale), both ladders, a short description, market stats and links
 
 ## Update your zones
 Every zone lives in **`zones.json`**. Edit the numbers, commit and push, and Railway redeploys automatically.
@@ -65,5 +65,5 @@ Only coins you hold send alerts. To change the list:
 `your-site/api/alerts` shows the alert settings and the last 20 alerts. After a redeploy the server starts fresh: it learns the current zones on its first check and alerts on changes from then on.
 
 ## How it works
-- `server/index.js`: a small Express server. It serves the site and proxies CoinGecko. Prices are cached for 60s and coin details for 24h, so every visitor shares one set of API calls and the key never reaches the browser.
+- `server/index.js`: a small Express server. It serves the site and proxies CoinGecko (last 12 months of chart data) plus DefiLlama (older history, for All-time). Prices are cached for 60s and coin details for 24h, so every visitor shares one set of API calls and the key never reaches the browser.
 - `src/`: the React + Tailwind frontend. Charts use TradingView Lightweight Charts.

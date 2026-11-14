@@ -25,7 +25,7 @@ const AUTH_ON = USERS.size > 0 || !!APP_PASSWORD;
 const ADMIN_USER = process.env.ADMIN_USER || APP_USERNAME || [...USERS.keys()][0] || '';
 const MOCK = process.env.MOCK === '1';
 const MOCK_SWING = Number(process.env.MOCK_SWING) || 0.01; // how far mock prices move (testing alerts)
-const CG = 'https://api.coingecko.com/api/v3';
+const CG = process.env.COINGECKO_API_BASE || 'https://api.coingecko.com/api/v3';
 
 const zones = JSON.parse(readFileSync(path.join(ROOT, 'zones.json'), 'utf8'));
 const assets = zones.assets;
@@ -125,15 +125,19 @@ function mockMarkets() {
     };
   });
 }
-function mockChart(ticker, days) {
+function mockChart(ticker, from, to) {
   const a = assets.find((x) => x.ticker.toLowerCase() === ticker) || assets[0];
-  const n = days <= 7 ? 168 : days <= 90 ? days * 24 / 4 : days;
-  const step = (days * 864e5) / n;
-  const now = Date.now();
-  return Array.from({ length: n }, (_, k) => {
-    const x = k / n;
-    return [now - (n - k) * step, a.snapshotPrice * (1.35 - 0.4 * x + 0.12 * Math.sin(x * 18) + 0.04 * Math.sin(x * 90))];
-  });
+  const span = to - from;
+  const n = Math.max(50, Math.min(1500, Math.round(span / (span <= 2 * 86400 ? 300 : span <= 90 * 86400 ? 3600 : 86400))));
+  const birth = Date.now() / 1000 - 6 * 365 * 86400; // pretend every coin is 6 years old
+  const out = [];
+  for (let k = 0; k <= n; k++) {
+    const t = from + (span * k) / n;
+    if (t < birth) continue;
+    const x = (t - birth) / (Date.now() / 1000 - birth); // 0 → 1 over the coin's life
+    out.push([t * 1000, a.snapshotPrice * (0.15 + 2.2 * x * x - 1.1 * x * x * x + 0.18 * Math.sin(x * 40) + 0.05 * Math.sin(x * 400))]);
+  }
+  return out;
 }
 
 // ---------- API ----------
@@ -261,15 +265,81 @@ app.get('/api/coin/:id', async (req, res) => {
   }
 });
 
+// ---------- price history ----------
+// CoinGecko's free plan only serves the last 365 days, so anything older comes from
+// DefiLlama's free price history (same CoinGecko ids, daily candles).
+const DAY = 86400;
+const LLAMA = process.env.LLAMA_API_BASE || 'https://coins.llama.fi';
+async function llama(pathAndQuery) {
+  const r = await fetch(LLAMA + pathAndQuery, { signal: AbortSignal.timeout(20_000), headers: { accept: 'application/json' } });
+  if (!r.ok) throw Object.assign(new Error(`DefiLlama ${r.status}`), { status: r.status });
+  return r.json();
+}
+function firstPriceTs(id) {
+  return cached(`first:${id}`, 7 * 24 * 3600_000, async () => {
+    const d = await llama(`/prices/first/coingecko:${id}`);
+    const ts = d?.coins?.[`coingecko:${id}`]?.timestamp;
+    if (!ts) throw new Error('no first price');
+    return ts;
+  });
+}
+const LLAMA_CHUNK = 365; // days per request
+async function llamaDaily(id, from, to) {
+  // Fetch in fixed, cache-friendly 365-day chunks
+  const out = [];
+  const first = Math.floor(from / DAY / LLAMA_CHUNK);
+  const last = Math.floor(to / DAY / LLAMA_CHUNK);
+  for (let c = first; c <= last; c++) {
+    const start = c * LLAMA_CHUNK * DAY;
+    const pts = await cached(`llama:${id}:${c}`, 24 * 3600_000, async () => {
+      const d = await llama(`/chart/coingecko:${id}?start=${start}&span=${LLAMA_CHUNK}&period=1d&searchWidth=600`);
+      return (d?.coins?.[`coingecko:${id}`]?.prices || []).map((p) => [p.timestamp * 1000, p.price]);
+    });
+    for (const p of pts) if (p[0] >= from * 1000 && p[0] <= to * 1000) out.push(p);
+  }
+  return out;
+}
+
 app.get('/api/chart/:id', async (req, res) => {
   const id = req.params.id.toLowerCase().replace(/[^a-z0-9-]/g, '');
-  const days = [7, 30, 90, 365].includes(Number(req.query.days)) ? Number(req.query.days) : 30;
-  if (MOCK) return res.json({ prices: mockChart(id, days) });
+  const now = Math.floor(Date.now() / 1000);
+  let to = Math.min(now, Number(req.query.to) || now);
+  let from = Number(req.query.from) || now - 90 * DAY;
+  if (req.query.days) from = now - Number(req.query.days) * DAY; // old-style links
+  const all = req.query.range === 'all';
+
+  if (MOCK) {
+    if (all) from = now - 6 * 365 * DAY;
+    return res.json({ prices: mockChart(id, from, to), from, to, limited: false });
+  }
   try {
-    const d = await cached(`chart:${id}:${days}`, days <= 7 ? 10 * 60_000 : 60 * 60_000, () =>
-      cg(`/coins/${id}/market_chart?vs_currency=usd&days=${days}`)
-    );
-    res.json({ prices: d.prices || [] });
+    if (all) from = await firstPriceTs(id).catch(() => now - 365 * DAY);
+    from = Math.max(0, Math.min(from, to - 3600));
+    // Round so nearby requests share a cache entry
+    const grain = to - from <= 2 * DAY ? 300 : 3600;
+    to = Math.ceil(to / grain) * grain;
+    from = Math.floor(from / grain) * grain;
+    const cgFloor = now - 364 * DAY;
+    const ttl = to - from <= 2 * DAY ? 5 * 60_000 : 30 * 60_000;
+
+    const data = await cached(`hist:${id}:${from}:${to}`, ttl, async () => {
+      let limited = false;
+      const parts = [];
+      if (from < cgFloor) {
+        try {
+          parts.push(...(await llamaDaily(id, from, Math.min(to, cgFloor))));
+        } catch (e) {
+          limited = true; // older history unavailable right now
+        }
+      }
+      if (to > cgFloor) {
+        const d = await cg(`/coins/${id}/market_chart/range?vs_currency=usd&from=${Math.max(from, cgFloor)}&to=${Math.min(to, now)}`);
+        parts.push(...(d.prices || []));
+      }
+      parts.sort((a, b) => a[0] - b[0]);
+      return { prices: parts, from, to, limited };
+    });
+    res.json(data);
   } catch (e) {
     res.status(e.status === 429 ? 503 : 502).json({ error: e.message });
   }
